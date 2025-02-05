@@ -1,0 +1,49 @@
+# Visual Studio specific files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+*.log
+
+# DotNet Core specific files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet packages
+*.nupkg
+packages/
+!packages/repositories.config
+
+# Environment and secrets
+.env
+secrets.json
+appsettings.*.json
+
+# Debug and release
+[Dd]ebug/
+[Rr]elease/
+[Tt]est[Rr]esults/
+*.ide
+
+# Rider & JetBrains
+.idea/
+*.sln.iml
+
+# ASP.NET Runtime-generated
+wwwroot/
+node_modules/
+dist/
+
+# Resharper
+_ReSharper.Caches/
+*.DotSettings.user
+
+# Logs
+*.log
+logs/
