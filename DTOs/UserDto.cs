@@ -1,15 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using MediaApi.Models;
+using Microsoft.AspNetCore.Mvc;
 
-namespace MediaApi.Models
+namespace MediaApi.DTOs
 {
-    public class User
+    public class UserDto 
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
         public string Name { get; set; }
+
         public string Email { get; set; }
 
         public int Age { get; set; }

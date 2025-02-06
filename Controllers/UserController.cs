@@ -1,4 +1,6 @@
-﻿using MediaApi.Models;
+﻿using MediaApi.DTOs;
+using MediaApi.Models;
+using MediaApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,37 +10,44 @@ namespace MediaApi.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
+        private readonly IUserService _userService;
         public List<User> Users { get; set; }
 
-        public UserController()
+        public UserController(IUserService userService)
         {
-            Users = new List<User>
-            {
-                new User { Id = 1, Name = "John Doe", Email = "", Age = 30 },
-                new User { Id = 2, Name = "Gus Vc", Email= "", Age =35 }
-            };
+          _userService = userService;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IEnumerable<UserDto>> GetUsers()
         {
 
-            return Users;
+          var users = await _userService.GetUsers();
+           
+          return users;
         }
 
         [HttpGet("{id}")]
-        public async Task<User> GetUser(int id)
+        public async Task<UserDto> GetUser(int id)
         {
-            var user = Users.FirstOrDefault(u => u.Id == id);
+           var user = await _userService.GetUser(id);
             return user;
         }
 
         [HttpPost]
-        public async Task<User> AddUser(User user)
+        public async Task<ActionResult<UserDto>> AddUser(UserInsertDto user)
         {
-            Users.Add(user);
-            return user;
+           
+            try
+            {
+                var newUser = await _userService.AddUser(user);
+                return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, user);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
         }
     }
 }

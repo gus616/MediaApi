@@ -21,11 +21,11 @@ namespace MediaApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAlbums([FromQuery] int userId)
         {
-            var albumList = Albums.Where(album => album.UserId == userId).ToList();
+            var albumList = await Task.Run(() => Albums.Where(album => album.UserId == userId).ToList());
 
             if (albumList == null || !albumList.Any())
             {
-                return NotFound("No albums with user:{id}");
+                return NotFound($"No albums with user:{userId}");
             }
 
             return Ok(albumList);

@@ -1,6 +1,8 @@
-﻿namespace MediaApi.Models
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace MediaApi.DTOs
 {
-    public class Album
+    public class AlbumDto 
     {
         public int Id { get; set; }
         public string Title { get; set; }

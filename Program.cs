@@ -1,10 +1,23 @@
+using MediaApi.Models;
+using MediaApi.Repository;
+using MediaApi.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IRepository<User>, UserRepository>();
+
+builder.Services.AddDbContext<MediaContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 builder.Services.AddControllers();
 

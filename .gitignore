@@ -47,3 +47,6 @@ _ReSharper.Caches/
 # Logs
 *.log
 logs/
+
+
+appsettings.json
