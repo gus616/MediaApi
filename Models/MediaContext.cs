@@ -8,5 +8,7 @@ namespace MediaApi.Models
         public MediaContext(DbContextOptions<MediaContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }  
+
+        public DbSet<Album> Albums { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using MediaApi.Models;
+﻿using MediaApi.DTOs;
+using MediaApi.Models;
+using MediaApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediaApi.Controllers
@@ -7,28 +9,28 @@ namespace MediaApi.Controllers
     [ApiController]
     public class AlbumController : Controller
     {
-        public List<Album> Albums { get; set; }
 
-        public AlbumController()
+        private readonly IAlbumService _albumService;
+
+
+        public AlbumController(IAlbumService albumService)
         {
-            Albums = new List<Album>
-                {
-                    new Album { Id = 1, Title = "Album 1", UserId = 1 },
-                    new Album { Id = 2, Title = "Album 2", UserId = 2 }
-                };
+            _albumService = albumService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAlbums([FromQuery] int userId)
         {
-            var albumList = await Task.Run(() => Albums.Where(album => album.UserId == userId).ToList());
+            var albums = await _albumService.GetAlbumsByUser(userId);
 
-            if (albumList == null || !albumList.Any())
-            {
-                return NotFound($"No albums with user:{userId}");
-            }
+            return Ok(albums);
+        }
 
-            return Ok(albumList);
+        [HttpPost]
+        public async Task<IActionResult> AddAlbum([FromBody] AlbumInsertDto album)
+        {
+            var newAlbum = await _albumService.AddAlbum(album);
+            return CreatedAtAction(nameof(GetAlbums), new { userId = newAlbum.UserId }, newAlbum);
         }
     }
 }
