@@ -5,6 +5,8 @@
 
         Task<IEnumerable<TEntity>> GetAll();
 
+        Task<IEnumerable<TEntity>> GetAllByUserId(int id);   
+
         Task<TEntity> GetById(int id);
 
         Task Add(TEntity entity);    

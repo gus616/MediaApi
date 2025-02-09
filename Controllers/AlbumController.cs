@@ -21,7 +21,7 @@ namespace MediaApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAlbums([FromQuery] int userId)
         {
-            var albums = await _albumService.GetAlbumsByUser(userId);
+            var albums = await _albumService.GetAllByUserId(userId);
 
             return Ok(albums);
         }
@@ -31,6 +31,13 @@ namespace MediaApi.Controllers
         {
             var newAlbum = await _albumService.AddAlbum(album);
             return CreatedAtAction(nameof(GetAlbums), new { userId = newAlbum.UserId }, newAlbum);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAlbum(int id)
+        {
+            await _albumService.DeleteAlbum(id);
+            return Ok();
         }
     }
 }

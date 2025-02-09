@@ -33,5 +33,9 @@ namespace MediaApi.Repository
 
         public IEnumerable<User> Search(Func<User, bool> filter) => _context.Users.Where(filter).ToList();
 
+        public Task<IEnumerable<User>> GetAllByUserId(int id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

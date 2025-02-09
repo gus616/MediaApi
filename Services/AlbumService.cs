@@ -30,9 +30,32 @@ namespace MediaApi.Services
             };
         }
 
-        public Task<IEnumerable<AlbumDto>> GetAlbumsByUser(int id)
+        public async Task<IEnumerable<AlbumDto>> GetAllByUserId(int id)
         {
-            throw new NotImplementedException();
+            var albumList = await _albumRepository.GetAllByUserId(id);
+
+            return albumList.Select(a => new AlbumDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                UserId = a.UserId
+            });
+        }
+
+        public async Task<bool> DeleteAlbum(int id) 
+        { 
+
+            var album = await _albumRepository.GetById(id);
+
+            if (album == null)
+            {
+                return false;
+            }
+
+                _albumRepository.Delete(album);
+            await _albumRepository.Save();
+
+            return true;
         }
     }
 }
