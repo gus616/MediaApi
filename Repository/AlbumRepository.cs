@@ -24,10 +24,7 @@ namespace MediaApi.Repository
 
         public async Task<IEnumerable<Album>> GetAllByUserId(int userId) => await _context.Albums.Where(a => a.UserId == userId).ToListAsync();
 
-        public Task<Album> GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<Album> GetById(int id) => await _context.Albums.FindAsync(id);
 
         public Task Save() => _context.SaveChangesAsync();
 
