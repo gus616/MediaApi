@@ -1,6 +1,8 @@
-﻿using MediaApi.DTOs;
+﻿using FluentValidation;
+using MediaApi.DTOs;
 using MediaApi.Models;
 using MediaApi.Services;
+using MediaApi.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,13 @@ namespace MediaApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IValidator<UserInsertDto> _userInsertValidator;
         public List<User> Users { get; set; }
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IValidator<UserInsertDto> userInsertValidator)
         {
           _userService = userService;
+          _userInsertValidator = userInsertValidator;
         }
 
         [HttpGet]
@@ -37,7 +41,14 @@ namespace MediaApi.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> AddUser(UserInsertDto user)
         {
-           
+           var validationResult = _userInsertValidator.Validate(user);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+
             try
             {
                 var newUser = await _userService.AddUser(user);

@@ -1,6 +1,9 @@
+using FluentValidation;
+using MediaApi.DTOs;
 using MediaApi.Models;
 using MediaApi.Repository;
 using MediaApi.Services;
+using MediaApi.Validators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -18,6 +21,8 @@ builder.Services.AddScoped<IAlbumService, AlbumService>();
 builder.Services.AddScoped<IRepository<Album>, AlbumRepository>();
 
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
+
+builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
 
 builder.Services.AddDbContext<MediaContext>(options =>
 {
