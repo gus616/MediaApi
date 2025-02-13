@@ -1,4 +1,5 @@
-﻿using MediaApi.DTOs;
+﻿using FluentValidation;
+using MediaApi.DTOs;
 using MediaApi.Models;
 using MediaApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,12 @@ namespace MediaApi.Controllers
     {
 
         private readonly IAlbumService _albumService;
+        private readonly IValidator<AlbumInsertDto> _albumInsertValidator;
 
-
-        public AlbumController(IAlbumService albumService)
+        public AlbumController(IAlbumService albumService, IValidator<AlbumInsertDto> albumInsertValidator)
         {
             _albumService = albumService;
+            _albumInsertValidator = albumInsertValidator;
         }
 
         [HttpGet]
@@ -29,6 +31,13 @@ namespace MediaApi.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAlbum([FromBody] AlbumInsertDto album)
         {
+
+            var validationResult = _albumInsertValidator.Validate(album);
+            if (!validationResult.IsValid) 
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var newAlbum = await _albumService.AddAlbum(album);
             return CreatedAtAction(nameof(GetAlbums), new { userId = newAlbum.UserId }, newAlbum);
         }

@@ -23,6 +23,7 @@ builder.Services.AddScoped<IRepository<Album>, AlbumRepository>();
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
 
 builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
+builder.Services.AddScoped<IValidator<AlbumInsertDto>, AlbumInsertValidator>();
 
 builder.Services.AddDbContext<MediaContext>(options =>
 {
