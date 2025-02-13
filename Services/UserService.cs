@@ -34,14 +34,28 @@ namespace MediaApi.Services
             };
         }
 
-        public Task<bool> DeleteUser(int id)
+        public async Task<bool> DeleteUser(int id)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetById(id);
+            if (user == null)
+            {
+                return false;
+            }
+            _userRepository.Delete(user);
+            await _userRepository.Save();
+            return true;
         }
+
 
         public async Task<UserDto> GetUser(int id)
         {
             var user = await _userRepository.GetById(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
             var userDto = new UserDto
             {
                 Id = user.Id,

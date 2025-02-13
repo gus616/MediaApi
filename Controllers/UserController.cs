@@ -52,13 +52,46 @@ namespace MediaApi.Controllers
             try
             {
                 var newUser = await _userService.AddUser(user);
-                return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, user);
+                return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUser);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
 
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteUser(int id)
+        {
+
+            UserDto user = await _userService.GetUser(id);
+
+            if (user is null)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "User not found",
+                    Detail = $"User with id {id} was not found"
+                });
+        }
+            try
+            {
+                var result = await _userService.DeleteUser(id);
+                if (result)
+                {
+                    return NoContent();
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Item could not be deleted");
+
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+       
         }
     }
 }
