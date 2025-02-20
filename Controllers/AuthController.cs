@@ -1,4 +1,6 @@
-﻿using MediaApi.Models;
+﻿using MediaApi.DTOs;
+using MediaApi.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,34 +16,79 @@ namespace MediaApi.Controllers
 
         private readonly IConfiguration _config;
 
-        public AuthController(IConfiguration config)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+
+        public AuthController(IConfiguration config, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _config = config;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+
+        [HttpPost("signup")]
+
+        public async Task<IActionResult> SignUp([FromBody] SignUpDto model)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = new ApplicationUser
+            {
+                FullName = model.FullName,
+                UserName = model.Email,
+                Email = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if(!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new {Message= "User created successfully" });
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginModel login)
+        public async Task<IActionResult> Login([FromBody] LoginModel login)
         {
 
-            //TODO: Authenticate user
 
-            if(login.Email == "gus@gmail.com" && login.Password == "prueba123")
+            var user = _userManager.FindByEmailAsync(login.Email).Result;
+
+            if (user == null)
             {
-                var token = GenerateJwtToken(login.Email);
-                return Ok(new { token });
+                return Unauthorized(new {Message= "Invalid credentials"});
             }
 
-            return Unauthorized();
+            var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
+
+            if (!result.Succeeded)
+            {
+                return Unauthorized(new { Message = "Invalid credentials" });
+            }
+
+            var token = GenerateJwtToken(user);
+            return Ok(new { token });
         }
 
-        private string GenerateJwtToken(string email)
+        private string GenerateJwtToken(ApplicationUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace MediaApi.Models
 {
-    public class MediaContext : DbContext
+    public class MediaContext : IdentityDbContext<ApplicationUser>
     {
         public MediaContext(DbContextOptions<MediaContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }  
+        public new DbSet<User> Users { get; set; }
 
         public DbSet<Album> Albums { get; set; }
     }
