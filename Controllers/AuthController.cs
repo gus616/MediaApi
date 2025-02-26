@@ -36,6 +36,12 @@ namespace MediaApi.Controllers
                 return BadRequest(ModelState);
             }
 
+            var userExists = await _userManager.FindByEmailAsync(model.Email);
+            if (!(userExists == null))
+            {
+                return BadRequest(new { Message = "User with this email already exists" });
+            }
+
             var user = new ApplicationUser
             {
                 FullName = model.FullName,
