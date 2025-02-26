@@ -60,7 +60,9 @@ namespace MediaApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            return Ok(new {Message= "User created successfully" });
+            var token = GenerateJwtToken(user);
+
+            return Ok(new {token});
         }
 
         [HttpPost("login")]
