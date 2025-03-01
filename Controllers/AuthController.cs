@@ -1,5 +1,6 @@
 ﻿using MediaApi.DTOs;
 using MediaApi.Models;
+using MediaApi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,97 +19,40 @@ namespace MediaApi.Controllers
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AuthController(IConfiguration config, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAuthService authService)
         {
             _config = config;
             _userManager = userManager;
             _signInManager = signInManager;
+            _authService = authService;
         }
 
-
-        [HttpPost("signup")]
-
-        public async Task<IActionResult> SignUp([FromBody] SignUpDto model)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(UserAuthDto request)
         {
-            if(!ModelState.IsValid)
+            try 
             {
-                return BadRequest(ModelState);
+                var user = await _authService.RegisterAsync(request);
+                return Ok();
             }
-
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (!(userExists == null))
+            catch (Exception e)
             {
-                return BadRequest(new { Message = "User with this email already exists" });
-            }
-
-            var user = new ApplicationUser
-            {
-                FullName = model.FullName,
-                UserName = model.Email,
-                Email = model.Email
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if(!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return BadRequest(ModelState);
-            }
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new {token});
+                return StatusCode(500, e.Message);
+            }          
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel login)
+        [HttpPost("loginUser")]
+        public async Task<IActionResult> LoginUser(UserLoginDto request)
         {
-
-
-            var user = _userManager.FindByEmailAsync(login.Email).Result;
-
+            var user = await _authService.LoginAsync(request);
             if (user == null)
             {
-                return Unauthorized(new {Message= "Invalid credentials"});
+                return Unauthorized();
             }
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, false);
-
-            if (!result.Succeeded)
-            {
-                return Unauthorized(new { Message = "Invalid credentials" });
-            }
-
-            var token = GenerateJwtToken(user);
-            return Ok(new { token });
+            return Ok(new { token = user });
         }
-
-        private string GenerateJwtToken(ApplicationUser user)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Issuer"],
-                claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+       
     }
 }
