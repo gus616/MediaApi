@@ -5,6 +5,7 @@ using MediaApi.Repository;
 using MediaApi.Services;
 using MediaApi.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -106,9 +107,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Console.WriteLine($"Token Validated: {context.SecurityToken}");
                 return Task.CompletedTask;
             }
-        };
+        };        
     }
     );
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
+}
+);
 
 builder.Services.AddAuthorization();
 

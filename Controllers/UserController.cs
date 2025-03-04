@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MediaApi.Controllers
 {
-    
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     
@@ -26,7 +26,7 @@ namespace MediaApi.Controllers
           _userInsertValidator = userInsertValidator;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        
         [HttpGet("GetUsers")]
         public async Task<IEnumerable<UserDto>> GetUsers()
         {
