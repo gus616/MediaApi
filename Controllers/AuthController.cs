@@ -1,12 +1,14 @@
 ﻿using MediaApi.DTOs;
 using MediaApi.Models;
 using MediaApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace MediaApi.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : Controller
