@@ -58,52 +58,59 @@ builder.Services.AddLogging(loggingBuilder =>
 
 
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    var jwtKey = builder.Configuration["Jwt:Key"];
-    if (string.IsNullOrEmpty(jwtKey) || jwtKey.Length < 32)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        throw new InvalidOperationException("JWT Key is missing or too short!");
-    }
-
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey.Trim())),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero // Prevents default 5-minute clock skew
-    };
-
-    Console.WriteLine($"JWT Issuer: {options.TokenValidationParameters.ValidIssuer}");
-    Console.WriteLine($"JWT Audience: {options.TokenValidationParameters.ValidAudience}");
-    Console.WriteLine($"Signing Key Length: {options.TokenValidationParameters.IssuerSigningKey?.KeySize}");
-
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {            
-            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-            return Task.CompletedTask;
-        },       
-        OnTokenValidated = context =>
+        options.RequireHttpsMetadata = false; //set to true in production
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            var userId = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            Console.WriteLine($"Token validated for user ID: {userId}");
-            return Task.CompletedTask;
-        }
-    };
-});
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+
+        Console.WriteLine($"JWT Issuer: {options.TokenValidationParameters.ValidIssuer}");
+        Console.WriteLine($"JWT Audience: {options.TokenValidationParameters.ValidAudience}");
+        Console.WriteLine($"Signing Key Length: {options.TokenValidationParameters.IssuerSigningKey?.KeySize}");
+
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsJsonAsync(new { error = "You are not Authorized" });
+            },
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Headers["Authorization"];
+                if (token.Count > 0)
+                {
+                    context.Token = token[0].Split(" ")[1];
+                }
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication Failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine($"Token Validated: {context.SecurityToken}");
+                return Task.CompletedTask;
+            }
+        };
+    }
+    );
+
+builder.Services.AddAuthorization();
 
 
 

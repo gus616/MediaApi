@@ -3,13 +3,14 @@ using MediaApi.DTOs;
 using MediaApi.Models;
 using MediaApi.Services;
 using MediaApi.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediaApi.Controllers
 {
-    [Authorize]
+    
     [Route("api/[controller]")]
     [ApiController]
     
@@ -25,8 +26,8 @@ namespace MediaApi.Controllers
           _userInsertValidator = userInsertValidator;
         }
 
-       
-        [HttpPost("GetUsers")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUsers")]
         public async Task<IEnumerable<UserDto>> GetUsers()
         {
 
