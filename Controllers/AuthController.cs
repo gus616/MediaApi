@@ -33,8 +33,14 @@ namespace MediaApi.Controllers
         {
             try 
             {
-                var user = await _authService.RegisterAsync(request);
-                return Ok();
+                var token = await _authService.RegisterAsync(request);
+                if (token == null)
+                {
+                    return BadRequest();
+                }
+
+
+                return Ok(new {token});
             }
             catch (Exception e)
             {

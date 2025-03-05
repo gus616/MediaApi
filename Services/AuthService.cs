@@ -33,13 +33,14 @@ namespace MediaApi.Services
             return CreateJwtToken(user);            
         }
 
-        public async Task<UserAuth> RegisterAsync(UserAuthDto userAuthDto)
+        public async Task<string> RegisterAsync(UserAuthDto userAuthDto)
         {
 
             userAuthDto.Password = new PasswordHasher<UserAuthDto>().HashPassword(userAuthDto, userAuthDto.Password);
 
             var user = await _repository.RegisterAsync(userAuthDto);
-           return user;
+            var token = CreateJwtToken(user);
+            return token;
         }
 
 
