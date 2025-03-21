@@ -13,5 +13,7 @@ namespace MediaApi.Models
         public DbSet<Album> Albums { get; set; }
 
         public DbSet<UserAuth> UserAuths { get; set; }
+
+        public DbSet<Photo> Photos { get; set; }
     }
 }

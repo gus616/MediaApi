@@ -29,6 +29,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IAlbumService, AlbumService>();
 
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+
 builder.Services.AddScoped<IRepository<Album>, AlbumRepository>();
 
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
@@ -37,6 +39,7 @@ builder.Services.AddScoped<IValidator<UserInsertDto>, UserInsertValidator>();
 builder.Services.AddScoped<IValidator<AlbumInsertDto>, AlbumInsertValidator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<PhotoRepository>();
 builder.Services.AddDbContext<MediaContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
