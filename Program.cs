@@ -189,9 +189,12 @@ app.Use(async (context, next) =>
 
 
 app.UseCors("react-app-client");
+app.UseStaticFiles(); // For the wwwroot folder
+
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

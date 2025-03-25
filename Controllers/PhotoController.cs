@@ -25,9 +25,9 @@ namespace MediaApi.Controllers
         {
             try
             {
-                 var photos = await _photoService.GetPhotos(albumId);
+                var photos = await _photoService.GetPhotos(albumId);
 
-                if(photos.Count() == 0)
+                if (photos.Count() == 0)
                 {
                     return NoContent();
                 }
@@ -59,6 +59,39 @@ namespace MediaApi.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded");
+            }
+
+            try
+            {
+                string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                string filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                string fileUrl = $"{Request.Scheme}://{Request.Host}/images/{uniqueFileName}";
+                return Ok(new { FileName = uniqueFileName, Url = fileUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+
         }
     }
 }
